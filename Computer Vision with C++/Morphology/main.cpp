@@ -1,7 +1,9 @@
 #include <iostream>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "imshow_multiple.h"
 #include "Morphology.h"
 
@@ -39,9 +41,11 @@ int main(int argc, char *argv[])
     morphology->dilate(imgClosing3, imgClosing3Dilated, imgKernelDot);
     morphology->erode(imgClosing3Dilated, imgClosing3Eroded, imgKernelDot);
     imshow_multiple("Closing #3", 3, &imgClosing3, &imgClosing3Dilated, &imgClosing3Eroded);
+
     ///////////////////////////////////////////////////////////////////////////////
     // Opening: erode then dilate
     ///////////////////////////////////////////////////////////////////////////////
+
     // Opening #1
     cv::Mat imgFingerprint = cv::imread(INPUTIMAGEDIR "/fingerprint.tiff", CV_LOAD_IMAGE_GRAYSCALE);
     cv::threshold(imgFingerprint, imgFingerprint, 0, 255, CV_THRESH_BINARY);
@@ -57,9 +61,11 @@ int main(int argc, char *argv[])
     morphology->erode(imgText3, imgText3Eroded, morphology->getKernelFull(4));
     morphology->dilate(imgText3Eroded, imgText3Dilated, morphology->getKernelFull(4));
     imshow_multiple("Opening #2, kernel 4x4", 3, &imgText3, &imgText3Eroded, &imgText3Dilated);
+
     ///////////////////////////////////////////////////////////////////////////////
     // Boundary extraction: subtract eroded image from original image
     ///////////////////////////////////////////////////////////////////////////////
+
     cv::Mat img = cv::imread(INPUTIMAGEDIR "/segments.tiff", CV_LOAD_IMAGE_GRAYSCALE);
     cv::threshold(img, img, 0, 255, CV_THRESH_BINARY);
     cv::Mat imgEroded, imgsubtracted;
@@ -70,4 +76,5 @@ int main(int argc, char *argv[])
     //wait for key pressed
     cv::waitKey();
 
-    return 0;}
+    return 0;
+}
