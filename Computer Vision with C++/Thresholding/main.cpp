@@ -1,19 +1,23 @@
 #include <iostream>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "Timer.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // compute threshold image using the OpenCV function
 ///////////////////////////////////////////////////////////////////////////////
-void threshold_cv(const cv::Mat &input, cv::Mat &output, uchar threshold)
+void threshold_cv(const cv::Mat &input, cv::Mat &output, int threshold)
 {
-    cv::threshold(input, output, 128, 255, cv::THRESH_BINARY);
+    cv::threshold(input, output, threshold, 255, cv::THRESH_BINARY);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 // compute threshold image by looping over the elements
 ///////////////////////////////////////////////////////////////////////////////
-void threshold_loop(const cv::Mat &input, cv::Mat &output, uchar threshold)
+void threshold_loop(const cv::Mat &input, cv::Mat &output, int threshold)
 {
     int rows = input.rows;
     int cols = input.cols;
@@ -29,11 +33,14 @@ void threshold_loop(const cv::Mat &input, cv::Mat &output, uchar threshold)
                 output.at<uchar>(r, c) = 255;
             else
                 output.at<uchar>(r, c) = 0;
-        }}}
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // compute threshold image by looping over the elements (pointer access)
 ///////////////////////////////////////////////////////////////////////////////
-void threshold_loop_ptr(const cv::Mat &input, cv::Mat &output, uchar threshold)
+void threshold_loop_ptr(const cv::Mat &input, cv::Mat &output, int threshold)
 {
     int rows = input.rows;
     int cols = input.cols;
@@ -59,11 +66,14 @@ void threshold_loop_ptr(const cv::Mat &input, cv::Mat &output, uchar threshold)
                 pOutput[c] = 255;
             else
                 pOutput[c] = 0;
-        } }}
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // compute threshold image by looping over the elements (pointer access)
 ///////////////////////////////////////////////////////////////////////////////
-void threshold_loop_ptr2(const cv::Mat &input, cv::Mat &output, uchar threshold)
+void threshold_loop_ptr2(const cv::Mat &input, cv::Mat &output, int threshold)
 {
     int rows = input.rows;
     int cols = input.cols;
@@ -92,14 +102,27 @@ void threshold_loop_ptr2(const cv::Mat &input, cv::Mat &output, uchar threshold)
             
             ++pInput;
             ++pOutput;
-        }}}
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    //read image
+    //default threshold value
+    int thresholdValue = 128;
+
+    //old threshold value
+    int thresholdValueOld = -1;
+
+    //read color image
     cv::Mat img = cv::imread("../data/lena.tiff");
-    //display image
+
+    //display color image
     cv::imshow("Image", img);
-    
+
+    //add trackbar to the color image window
+    cv::createTrackbar("Threshold", "Image", &thresholdValue, 400, nullptr);
+
     //convert to grayscale
     cv::Mat imgGray;
     cv::cvtColor(img, imgGray, CV_BGR2GRAY);
@@ -107,40 +130,61 @@ int main(int argc, char *argv[])
     cv::imshow("Grayscale", imgGray);
 
     //declare output variables
-    cv::Mat output;
-    
-    // begin processing ///////////////////////////////////////////////////////////
+    cv::Mat output_cv;
+    cv::Mat output_loop;
+    cv::Mat output_loop_ptr;
+    cv::Mat output_loop_ptr2;
 
-    INIT_TIMER
-    
-    START_TIMER
-    threshold_cv(imgGray, output, 128);
-    STOP_TIMER("threshold_cv")
+    //endless loop
+    while(true)
+    {
+        int key = cv::waitKey(10);
+        if (key >= 0)
+        {
+            break; //leave endless loop
+        }
 
-    cv::imshow("threshold_cv", output);
+        if (thresholdValue == thresholdValueOld) //threshold value was not changed
+        {
+            continue;
+        }
 
-    
-    START_TIMER
-    threshold_loop(imgGray, output, 200);
-    STOP_TIMER("threshold_loop")
+        thresholdValueOld = thresholdValue;
+        std::cout << std::endl;
 
-    cv::imshow("threshold_loop", output);
+        // begin processing ///////////////////////////////////////////////////////////
 
-    
-    START_TIMER
-    threshold_loop_ptr(imgGray, output, 50);
-    STOP_TIMER("threshold_loop_ptr")
+        INIT_TIMER
 
-    cv::imshow("threshold_loop_ptr", output);
-    
-    
-    START_TIMER
-    threshold_loop_ptr2(imgGray, output, 160);
-    STOP_TIMER("threshold_loop_ptr2")
+        START_TIMER
+        threshold_cv(imgGray, output_cv, thresholdValue);
+        STOP_TIMER("threshold_cv\t")
 
-    cv::imshow("threshold_loop_ptr2", output);
-    // end processing /////////////////////////////////////////////////////////////
-    //wait for key pressed
-    cv::waitKey();
+        cv::imshow("threshold_cv", output_cv);
+
+
+        START_TIMER
+        threshold_loop(imgGray, output_loop, thresholdValue);
+        STOP_TIMER("threshold_loop\t")
+
+        cv::imshow("threshold_loop", output_loop);
+
+
+        START_TIMER
+        threshold_loop_ptr(imgGray, output_loop_ptr, thresholdValue);
+        STOP_TIMER("threshold_loop_ptr\t")
+
+        cv::imshow("threshold_loop_ptr", output_loop_ptr);
+
+
+        START_TIMER
+        threshold_loop_ptr2(imgGray, output_loop_ptr2, thresholdValue);
+        STOP_TIMER("threshold_loop_ptr2\t")
+
+        cv::imshow("threshold_loop_ptr2", output_loop_ptr2);
+
+        // end processing /////////////////////////////////////////////////////////////
+    }
+
     return 0;
 }
