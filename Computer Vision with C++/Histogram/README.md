@@ -21,8 +21,7 @@ Relevant source files:
 - max: result for the maximum
 - mean: result for the mean value
 
-3. PointOperations.cpp:
-
+3. PointOperations.cpp: 
 1. Implement the function ”void PointOperations::adjustContrast(cv::Mat &input, cv::Mat &output, float alpha, uchar center)” for contrast adjustment:
 - input: input image
 - output: output image for the result
