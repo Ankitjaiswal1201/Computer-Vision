@@ -1,9 +1,13 @@
 #include <iostream>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "Timer.h"
+
 #include <arm_neon.h>
+
 // convert BGR image to grayscale (manually with C++ - code)
 void reference_convert (uint8_t * __restrict dest, uint8_t * __restrict src, int n) {
   int i;
@@ -19,7 +23,9 @@ void reference_convert (uint8_t * __restrict dest, uint8_t * __restrict src, int
 
     // undo the scale by 256 and write to memory:
     *dest++ = (y>>8);
-  }}
+  }
+}
+
 // convert BGR image to grayscale using hardware acceleration of the Raspberry Pi (NEON)
 // this NEON intrinistics code is only used to demonstrate the abilities of the hardware
 // in this seminar you do NOT have to understand or write any NEON code
@@ -43,18 +49,24 @@ void neon_convert (uint8_t * __restrict dest, uint8_t * __restrict src, int n) {
     vst1_u8 (dest, result);
     src  += 8*3;
     dest += 8;
-  }}
+  }
+}
+
 
 int main(int argc, char *argv[]) {
     // read image
     cv::Mat img = cv::imread("../data/lena.tiff");
+
     // get image size
     int cols = img.cols;
     int rows = img.rows;
+
     // check for continuous data in memory
     if (img.isContinuous()) {
       cols = rows*cols;
-      rows = 1;}
+      rows = 1;
+    }
+
     // convert BGR image to C-readable format for C and NEON code
     uint8_t imageArray[rows*cols*3];
     cv::Vec3b tmp; // Vec3b used to access the 3 channels (BGR) of a pixel
@@ -65,8 +77,10 @@ int main(int argc, char *argv[]) {
         imageArray[y*img.cols*3+x*3] = tmp.val[0];
         imageArray[y*img.cols*3+x*3+1] = tmp.val[1];
         imageArray[y*img.cols*3+x*3+2] = tmp.val[2];
-      }}
+      }
+    }
     INIT_TIMER
+
     // convert to grayscale with OpenCV
     cv::Mat imgGray;
     START_TIMER
@@ -95,7 +109,9 @@ int main(int argc, char *argv[]) {
         // increment data address
         pInput++;
         pOutput++;
-      } }
+      }
+    }
+
     // convert to grayscale with NEON Intrinsics
     // create output matrix
     cv::Mat imgGray_neon = cv::Mat::zeros(img.rows, img.cols, CV_8U);
@@ -104,6 +120,7 @@ int main(int argc, char *argv[]) {
     START_TIMER
     neon_convert(imageArray_neon, imageArray, rows*cols);
     STOP_TIMER("Grayscale_NEON  ")
+
     // convert image back to OpenCV format for displaying
     // pointer to input data
     pInput = imageArray_neon;   // pointer without index
@@ -113,17 +130,21 @@ int main(int argc, char *argv[]) {
       for (int c = 0; c < cols; c++) {
         // copy Input to Output
         *pOutput = *pInput; // pointer without index
+
         // increment data address
         pInput++;
         pOutput++;
-      } }
+      }
+    }
 
     // display images
     cv::imshow("Original Image", img);
     cv::imshow("Grayscale OpenCV", imgGray);
     cv::imshow("Grayscale C", imgGray_c);
     cv::imshow("Grayscale NEON", imgGray_neon);
+
     //wait for key pressed
     cv::waitKey();
+
     return 0;
 }
