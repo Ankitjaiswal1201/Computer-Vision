@@ -28,14 +28,3 @@ Download the shape detector file from [here](http://dlib.net/files/shape_predict
 
 
 
-## Some Results of Landmarks Identified
-
-
-Example 1
-
-<img src="https://github.com/Ankitjaiswal1201/Computer-Vision/tree/master/Face_Swapper/Example%201.png" alt="" data-canonical-src="https://github.com/Ankitjaiswal1201/Computer-Vision/tree/master/Face_Swapper/Example%201.png" width="500" height="500" />
-
-
-Example 2 
-
-<img src="https://github.com/Ankitjaiswal1201/Computer-Vision/tree/master/Face_Swapper/Example%202.png" alt="" data-canonical-src="https://github.com/Ankitjaiswal1201/Computer-Vision/tree/master/Face_Swapper/Example%202.png" width="500" height="500" />
